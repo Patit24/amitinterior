@@ -1,0 +1,275 @@
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const preloader = document.querySelector(".preloader");
+const count = document.querySelector(".preloader__count");
+
+const unlockPage = () => {
+  document.body.classList.remove("is-loading");
+  document.body.classList.add("ready");
+  preloader?.setAttribute("aria-hidden", "true");
+};
+
+if (prefersReducedMotion) {
+  unlockPage();
+} else {
+  const startedAt = performance.now();
+  const loadingDuration = 2150;
+
+  const updateCount = (now) => {
+    const progress = Math.min((now - startedAt) / loadingDuration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    count.textContent = String(Math.round(eased * 100)).padStart(2, "0");
+    if (progress < 1) requestAnimationFrame(updateCount);
+  };
+
+  requestAnimationFrame(updateCount);
+
+  window.addEventListener("load", () => {
+    const elapsed = performance.now() - startedAt;
+    const wait = Math.max(loadingDuration - elapsed, 0);
+
+    window.setTimeout(() => {
+      preloader.classList.add("is-complete");
+      window.setTimeout(() => {
+        preloader.classList.add("is-open");
+        unlockPage();
+        window.setTimeout(() => preloader.remove(), 1150);
+      }, 430);
+    }, wait);
+  });
+}
+
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-visible");
+      revealObserver.unobserve(entry.target);
+    });
+  },
+  { threshold: 0.14, rootMargin: "0px 0px -7% 0px" },
+);
+
+document.querySelectorAll(".reveal").forEach((element) => revealObserver.observe(element));
+
+const header = document.querySelector(".site-header");
+const menuToggle = document.querySelector(".menu-toggle");
+const mobileMenu = document.querySelector(".mobile-menu");
+
+const setMenuState = (open) => {
+  menuToggle?.setAttribute("aria-expanded", String(open));
+  mobileMenu?.setAttribute("aria-hidden", String(!open));
+  mobileMenu?.classList.toggle("is-open", open);
+  document.body.classList.toggle("menu-open", open);
+};
+
+menuToggle?.addEventListener("click", () => {
+  setMenuState(menuToggle.getAttribute("aria-expanded") !== "true");
+});
+
+mobileMenu?.querySelectorAll("a").forEach((link) => {
+  link.addEventListener("click", () => setMenuState(false));
+});
+
+const comparison = document.querySelector(".comparison");
+const comparisonRange = document.querySelector("#comparison-range");
+comparisonRange?.addEventListener("input", () => {
+  comparison.style.setProperty("--position", `${comparisonRange.value}%`);
+});
+
+const form = document.querySelector(".consultation-form");
+form?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const status = form.querySelector(".form-status");
+  status.textContent = "Thank you — your consultation request is ready. We’ll contact you shortly.";
+  form.reset();
+});
+
+const portfolioItems = [
+  { src: "/Images/portfolio/portfolio-01.jpg", title: "Pooja Room", meta: "Custom altar · Lighting", alt: "Completed pooja room with custom altar, marble floor and crystal chandelier" },
+  { src: "/Images/portfolio/portfolio-02.jpg", title: "Devotional Wall", meta: "Marble · Brass inlay", alt: "Marble and gold devotional wall beside the custom pooja room" },
+  { src: "/Images/portfolio/portfolio-03.jpg", title: "Statement Ceiling", meta: "Laser-cut detail · Cove light", alt: "Decorative false ceiling and carved arched doorway in the living room" },
+  { src: "/Images/portfolio/portfolio-04.jpg", title: "TV Wall", meta: "Marble · Fluted panel", alt: "Teal sectional sofa facing a marble and gold television wall" },
+  { src: "/Images/portfolio/portfolio-05.jpg", title: "Sacred Threshold", meta: "Hand-carved timber", alt: "Carved double doors opening into the illuminated pooja room" },
+  { src: "/Images/portfolio/portfolio-06.jpg", title: "Display Wall", meta: "Timber · Integrated light", alt: "Bespoke illuminated display storage behind a teal living room sofa" },
+  { src: "/Images/portfolio/portfolio-07.jpg", title: "Carved Entrance", meta: "Timber · Decorative panels", alt: "Carved arched timber door framed by decorative wall panels" },
+  { src: "/Images/portfolio/portfolio-08.jpg", title: "Living Composition", meta: "Bespoke furniture", alt: "Full living room view with teal sofa, marble TV wall and display cabinetry" },
+  { src: "/Images/portfolio/portfolio-09.jpg", title: "Glass Partition", meta: "Etched leaf pattern", alt: "Leaf-pattern etched glass sliding partition" },
+  { src: "/Images/portfolio/portfolio-10.jpg", title: "Ceiling Geometry", meta: "Layered ambient lighting", alt: "Living room with illuminated leaf-pattern false ceiling" },
+  { src: "/Images/portfolio/portfolio-11.jpg", title: "Mirror Nook", meta: "Upholstery · Wardrobe", alt: "Upholstered bench beneath a diamond-cut mirror wall and fitted storage" },
+  { src: "/Images/portfolio/portfolio-12.jpg", title: "Completed Living Room", meta: "Final reveal", alt: "Wide view of the completed living room with statement ceiling and custom sofa" },
+];
+
+const filterButtons = [...document.querySelectorAll(".portfolio-filters button")];
+const portfolioTiles = [...document.querySelectorAll(".portfolio-tile")];
+
+filterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const filter = button.dataset.filter;
+    filterButtons.forEach((item) => {
+      const active = item === button;
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+    portfolioTiles.forEach((tile) => {
+      const categories = tile.dataset.category.split(" ");
+      tile.classList.toggle("is-filtered-out", filter !== "all" && !categories.includes(filter));
+    });
+  });
+});
+
+const viewer = document.querySelector(".project-viewer");
+const viewerImage = viewer?.querySelector(".project-viewer__image");
+const viewerTitle = viewer?.querySelector("#viewer-title");
+const viewerMeta = viewer?.querySelector(".project-viewer__meta");
+const viewerCount = viewer?.querySelector(".project-viewer__count");
+const viewerClose = viewer?.querySelector(".project-viewer__close");
+const viewerPrev = viewer?.querySelector(".project-viewer__nav--prev");
+const viewerNext = viewer?.querySelector(".project-viewer__nav--next");
+let viewerIndex = 0;
+let viewerTrigger = null;
+
+const renderViewer = (index, animate = true) => {
+  viewerIndex = (index + portfolioItems.length) % portfolioItems.length;
+  const item = portfolioItems[viewerIndex];
+  const applyItem = () => {
+    viewerImage.src = item.src;
+    viewerImage.alt = item.alt;
+    viewerTitle.textContent = item.title;
+    viewerMeta.textContent = item.meta;
+    viewerCount.textContent = `${String(viewerIndex + 1).padStart(2, "0")} / ${portfolioItems.length}`;
+    viewer.classList.remove("is-changing");
+  };
+
+  if (animate && !prefersReducedMotion) {
+    viewer.classList.add("is-changing");
+    window.setTimeout(applyItem, 220);
+  } else {
+    applyItem();
+  }
+};
+
+const openViewer = (index, trigger) => {
+  viewerTrigger = trigger;
+  renderViewer(index, false);
+  viewer.classList.add("is-open");
+  viewer.setAttribute("aria-hidden", "false");
+  document.body.classList.add("portfolio-open");
+  window.setTimeout(() => viewerClose.focus(), prefersReducedMotion ? 0 : 300);
+};
+
+const closeViewer = () => {
+  viewer.classList.remove("is-open");
+  viewer.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("portfolio-open");
+  viewerTrigger?.focus();
+};
+
+portfolioTiles.forEach((tile) => {
+  tile.addEventListener("click", () => openViewer(Number(tile.dataset.index), tile));
+});
+
+viewerClose?.addEventListener("click", closeViewer);
+viewerPrev?.addEventListener("click", () => renderViewer(viewerIndex - 1));
+viewerNext?.addEventListener("click", () => renderViewer(viewerIndex + 1));
+
+document.addEventListener("keydown", (event) => {
+  if (!viewer?.classList.contains("is-open")) return;
+  if (event.key === "Escape") closeViewer();
+  if (event.key === "ArrowLeft") renderViewer(viewerIndex - 1);
+  if (event.key === "ArrowRight") renderViewer(viewerIndex + 1);
+});
+
+const showroom = document.querySelector(".showroom");
+const hero = document.querySelector(".hero");
+const media = document.querySelector(".hero__media");
+const sun = document.querySelector(".hero__sun");
+const materialCards = [...document.querySelectorAll(".hero__material-card")];
+const scenes = [...document.querySelectorAll(".room-scene")];
+const roomIndex = document.querySelector(".room-status__index");
+const roomName = document.querySelector(".room-status strong");
+const progressBar = document.querySelector(".room-progress span");
+let activeScene = 0;
+let scrollProgress = 0;
+let targetX = 0;
+let targetY = 0;
+let currentX = 0;
+let currentY = 0;
+let ticking = false;
+
+const updateShowroom = () => {
+  if (!showroom) return;
+  const start = showroom.offsetTop;
+  const distance = Math.max(showroom.offsetHeight - window.innerHeight, 1);
+  scrollProgress = Math.min(Math.max((window.scrollY - start) / distance, 0), 1);
+  const nextScene = Math.min(Math.floor(scrollProgress * scenes.length), scenes.length - 1);
+
+  if (nextScene !== activeScene) {
+    scenes[activeScene]?.classList.remove("is-active");
+    scenes[nextScene]?.classList.add("is-active");
+    activeScene = nextScene;
+    roomIndex.textContent = String(nextScene + 1).padStart(2, "0");
+    roomName.textContent = scenes[nextScene].dataset.room;
+  }
+
+  progressBar.style.transform = `scaleY(${scrollProgress})`;
+  header?.classList.toggle("is-scrolled", window.scrollY > 70);
+  ticking = false;
+};
+
+window.addEventListener(
+  "scroll",
+  () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(updateShowroom);
+  },
+  { passive: true },
+);
+
+updateShowroom();
+
+if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
+  let frame;
+
+  const renderParallax = () => {
+    currentX += (targetX - currentX) * 0.05;
+    currentY += (targetY - currentY) * 0.05;
+    const horizontalTravel = currentX * -48;
+    const verticalTravel = currentY * -12 + scrollProgress * -18;
+    media.style.transform = `translate3d(${horizontalTravel}px, ${verticalTravel}px, 0) scale(1.04)`;
+    sun.style.transform = `translate3d(${currentX * 22}px, ${currentY * 12}px, 0) rotate(14deg)`;
+    materialCards.forEach((card, index) => {
+      const depth = index === 0 ? 18 : -14;
+      const lift = index === 0 ? -scrollProgress * 22 : scrollProgress * 16;
+      card.style.transform = `translate3d(${currentX * depth}px, ${currentY * depth * 0.55 + lift}px, 0)`;
+    });
+    frame = requestAnimationFrame(renderParallax);
+  };
+
+  hero.addEventListener("pointermove", (event) => {
+    const rect = hero.getBoundingClientRect();
+    targetX = (event.clientX - rect.left) / rect.width - 0.5;
+    targetY = (event.clientY - rect.top) / rect.height - 0.5;
+  });
+
+  hero.addEventListener("pointerleave", () => {
+    targetX = 0;
+    targetY = 0;
+  });
+
+  frame = requestAnimationFrame(renderParallax);
+  window.addEventListener("pagehide", () => cancelAnimationFrame(frame), { once: true });
+
+  document.querySelectorAll(".magnetic").forEach((element) => {
+    element.addEventListener("pointermove", (event) => {
+      const rect = element.getBoundingClientRect();
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      element.style.transform = `translate3d(${x * 0.08}px, ${y * 0.1}px, 0)`;
+    });
+
+    element.addEventListener("pointerleave", () => {
+      element.style.transform = "translate3d(0, 0, 0)";
+    });
+  });
+}

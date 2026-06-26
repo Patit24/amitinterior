@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="theme-color" content="#2d2d2d" />
+  <meta name="description" content="Book an interior design consultation with Amit Interior." /><title>Contact — Amit Interior</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/pages.css" />
+</head>
+<body class="inner-page contact-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header" aria-label="Main navigation">
+    <a class="brand" href="/" aria-label="Amit Interior home"><img src="/Logo.png" alt="Amit Interior" /></a>
+    <nav class="desktop-nav" aria-label="Primary"><a href="/">Home</a><a href="/about/">About</a><a href="/services/">Services</a><a href="/portfolio/">Portfolio</a><a href="/contact/" aria-current="page">Contact</a></nav>
+    <a class="header-cta" href="#consultation"><span>Start brief</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" /></svg></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span class="sr-only">Open menu</span></button>
+  </header>
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true"><nav aria-label="Mobile navigation"><a href="/"><span>01</span>Home</a><a href="/about/"><span>02</span>About</a><a href="/services/"><span>03</span>Services</a><a href="/portfolio/"><span>04</span>Portfolio</a><a href="/contact/"><span>05</span>Contact</a></nav><p>Designing spaces.<br />Creating experiences.</p></div>
+  <main id="main" class="page-main">
+    <section class="contact-layout" id="consultation">
+      <div class="contact-layout__image">
+        <img src="/Images/sections/workspace.png" alt="Warm designer workspace with timber and neutral materials" />
+        <div class="contact-image-card reveal"><span>Response window</span><strong>24–48 hrs</strong><p>We review every brief before recommending the next step.</p></div>
+      </div>
+      <div class="contact-layout__content">
+        <p class="eyebrow reveal"><span></span> Begin a conversation</p><h1 class="reveal">Tell us about your <em>space.</em></h1>
+        <p class="contact-intro reveal">Share a few details about your site, timeline and dream atmosphere. The studio will use this to prepare a focused first conversation.</p>
+        <div class="contact-quick reveal" aria-label="Project quick information">
+          <div><span>Best for</span><strong>Homes, offices, renovation</strong></div>
+          <div><span>Location</span><strong>Kolkata & nearby</strong></div>
+        </div>
+        <form class="consultation-form reveal">
+          <div class="form-field"><label for="contact-name">Name</label><input id="contact-name" name="name" autocomplete="name" required /></div>
+          <div class="form-field"><label for="contact-phone">Phone</label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" required /></div>
+          <div class="form-field"><label for="contact-email">Email</label><input id="contact-email" name="email" type="email" autocomplete="email" required /></div>
+          <div class="form-field"><label for="contact-type">Project type</label><select id="contact-type" name="project-type"><option>Residential interior</option><option>Commercial interior</option><option>Modular kitchen</option><option>Renovation</option></select></div>
+          <div class="form-field form-field--wide"><label for="contact-message">Project details</label><textarea id="contact-message" name="message" rows="3"></textarea></div>
+          <button class="contact__cta" type="submit"><span>Request consultation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" /></svg></button><p class="form-status" aria-live="polite"></p>
+        </form>
+        <div class="contact-details reveal"><div><span>Studio</span><p>Kolkata, West Bengal<br />Consultations by appointment</p></div><div><span>Hours</span><p>Monday–Saturday<br />10:00 AM–7:00 PM</p></div><div><span>Email</span><a href="mailto:hello@amitinterior.com">hello@amitinterior.com</a></div></div>
+      </div>
+    </section>
+  </main>
+  <footer class="inner-footer"><span>© 2026 Amit Interior</span><span>Designing Spaces. Creating Experiences.</span></footer>
+  <script type="module" src="/src/page.js"></script>
+</body>
+</html>
