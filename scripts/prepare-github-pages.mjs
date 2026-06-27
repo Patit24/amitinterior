@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const distDir = fileURLToPath(new URL("../dist/", import.meta.url));
 const repoBase = "/amitinterior";
 
-const localAbsolutePath = /(?<attr>\b(?:href|src)=["'])\/(?!(?:amitinterior|assets)\/)(?<path>(?:about|contact|portfolio|services)(?:\/|#)?|Images\/|Logo\.png|favicon\.ico)/g;
+const localAbsolutePath = /(?<attr>\b(?:href|src)=["'])\/(?!(?:amitinterior|assets)\/)(?<path>(?:admin|about|contact|portfolio|services)(?:\/|#)?|Images\/|Logo\.png|favicon\.ico)/g;
 
 async function walk(dir) {
   const entries = await readdir(dir, { withFileTypes: true });

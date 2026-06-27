@@ -14,6 +14,7 @@ export default defineConfig({
         services: resolve(root, "services/index.html"),
         portfolio: resolve(root, "portfolio/index.html"),
         contact: resolve(root, "contact/index.html"),
+        admin: resolve(root, "admin/index.html"),
       },
     },
   },
