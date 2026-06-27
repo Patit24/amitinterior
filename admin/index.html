@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Admin — Amit Interior</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script type="module" crossorigin src="/amitinterior/assets/admin-DDTyjniT.js"></script>
+  <link rel="modulepreload" crossorigin href="/amitinterior/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/amitinterior/assets/firebase-D59dnB8l.js">
+  <link rel="stylesheet" crossorigin href="/amitinterior/assets/admin-C7B89XVr.css">
+</head>
+<body class="admin-body">
+  <main class="admin-shell">
+    <section class="admin-hero">
+      <a href="/amitinterior/" class="admin-brand"><img src="/amitinterior/assets/Logo-RJfMb6qi.png" alt="Amit Interior" /> Admin Studio</a>
+      <div>
+        <p>Firebase CMS</p>
+        <h1>Manage portfolio images and services.</h1>
+        <span>Upload work, edit captions, add new service pages, and keep the public website current.</span>
+      </div>
+      <a href="/amitinterior/portfolio/" class="admin-view-site">View website ↗</a>
+    </section>
+
+    <p class="admin-status" data-tone="info" role="status">Checking Firebase configuration…</p>
+
+    <section class="admin-login">
+      <form id="login-form" class="admin-card">
+        <h2>Sign in</h2>
+        <label>Email<input id="admin-email" type="email" autocomplete="email" required /></label>
+        <label>Password<input id="admin-password" type="password" autocomplete="current-password" required minlength="6" /></label>
+        <label class="admin-check"><input id="create-account" type="checkbox" /> Create first admin account</label>
+        <button type="submit">Enter admin panel</button>
+        <p class="admin-help">Use “Create first admin account” only once, then tighten Firebase rules to your admin email/UID.</p>
+      </form>
+    </section>
+
+    <section class="admin-app" hidden>
+      <div class="admin-toolbar">
+        <div><span>Dashboard</span><strong>Content manager</strong></div>
+        <button type="button" id="logout">Sign out</button>
+      </div>
+
+      <div class="admin-grid">
+        <form id="portfolio-form" class="admin-card">
+          <input id="portfolio-id" type="hidden" />
+          <h2>Portfolio image</h2>
+          <label>Title<input id="portfolio-title-input" type="text" required placeholder="Luxury living room" /></label>
+          <label>Meta / subtitle<input id="portfolio-meta" type="text" placeholder="Marble · Cove light" /></label>
+          <label>Alt text<textarea id="portfolio-alt" rows="2" required placeholder="Describe the image for accessibility"></textarea></label>
+          <div class="admin-two">
+            <label>Categories<input id="portfolio-category" type="text" placeholder="living ceiling" /></label>
+            <label>Layout
+              <select id="portfolio-layout">
+                <option value="">Normal</option>
+                <option value="hero">Hero</option>
+                <option value="wide">Wide</option>
+                <option value="tall">Tall</option>
+              </select>
+            </label>
+          </div>
+          <div class="admin-two">
+            <label>Order<input id="portfolio-order" type="number" value="0" /></label>
+            <label>Image<input id="portfolio-image" type="file" accept="image/*" /></label>
+          </div>
+          <img id="portfolio-preview" class="admin-preview" alt="" hidden />
+          <label class="admin-check"><input id="portfolio-active" type="checkbox" checked /> Show on website</label>
+          <div class="admin-actions"><button id="portfolio-submit" type="submit">Publish portfolio item</button><button id="portfolio-cancel" type="button">Clear</button></div>
+        </form>
+
+        <form id="service-form" class="admin-card">
+          <input id="service-id" type="hidden" />
+          <h2>Service</h2>
+          <div class="admin-two">
+            <label>Slug<input id="service-slug" type="text" required placeholder="residential" /></label>
+            <label>Order<input id="service-order" type="number" value="0" /></label>
+          </div>
+          <label>Label<input id="service-label" type="text" required placeholder="01 / Residential Interiors" /></label>
+          <label>Title<input id="service-title-input" type="text" required placeholder="Homes made deeply personal." /></label>
+          <label>Description<textarea id="service-description" rows="3" required></textarea></label>
+          <label>Bullet points<textarea id="service-bullets" rows="4" placeholder="Space planning&#10;Lighting design&#10;Custom storage"></textarea></label>
+          <label>Image<input id="service-image" type="file" accept="image/*" /></label>
+          <img id="service-preview" class="admin-preview" alt="" hidden />
+          <label class="admin-check"><input id="service-active" type="checkbox" checked /> Show on website</label>
+          <div class="admin-actions"><button id="service-submit" type="submit">Publish service</button><button id="service-cancel" type="button">Clear</button></div>
+        </form>
+      </div>
+
+      <div class="admin-lists">
+        <section class="admin-card">
+          <h2>Portfolio items</h2>
+          <div id="portfolio-list" class="admin-list"></div>
+        </section>
+        <section class="admin-card">
+          <h2>Services</h2>
+          <div id="services-list" class="admin-list"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
