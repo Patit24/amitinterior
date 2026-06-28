@@ -42,6 +42,26 @@ const showStatus = (message, tone = "info") => {
   status.dataset.tone = tone;
 };
 
+const friendlyFirebaseError = (error) => {
+  const code = error?.code || "";
+  if (code === "auth/configuration-not-found") {
+    return "Firebase Authentication is not enabled yet. In Firebase Console, open Authentication → Sign-in method → enable Email/Password, then try again.";
+  }
+  if (code === "auth/operation-not-allowed") {
+    return "Email/Password sign-in is disabled. Enable it in Firebase Console → Authentication → Sign-in method.";
+  }
+  if (code === "auth/email-already-in-use") {
+    return "This email already has an admin account. Untick “Create first admin account” and sign in normally.";
+  }
+  if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
+    return "Email or password is incorrect. Check the credentials, or create the first admin account if this is your first login.";
+  }
+  if (code === "storage/unauthorized" || code === "permission-denied") {
+    return "Firebase rules blocked this action. Publish the Firestore and Storage rules from the project files.";
+  }
+  return error?.message || "Something went wrong. Please try again.";
+};
+
 const setBusy = (form, busy) => {
   form?.querySelectorAll("button, input, textarea, select").forEach((control) => {
     control.disabled = busy;
@@ -165,7 +185,7 @@ $("#login-form")?.addEventListener("submit", async (event) => {
       showStatus("Signed in.", "success");
     }
   } catch (error) {
-    showStatus(error.message, "error");
+    showStatus(friendlyFirebaseError(error), "error");
   } finally {
     setBusy(event.currentTarget, false);
   }
@@ -221,7 +241,7 @@ portfolioForm?.addEventListener("submit", async (event) => {
     resetPortfolioForm();
     await loadPortfolio();
   } catch (error) {
-    showStatus(error.message, "error");
+    showStatus(friendlyFirebaseError(error), "error");
   } finally {
     setBusy(portfolioForm, false);
   }
@@ -258,7 +278,7 @@ serviceForm?.addEventListener("submit", async (event) => {
     resetServiceForm();
     await loadServices();
   } catch (error) {
-    showStatus(error.message, "error");
+    showStatus(friendlyFirebaseError(error), "error");
   } finally {
     setBusy(serviceForm, false);
   }
