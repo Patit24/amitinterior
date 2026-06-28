@@ -61,10 +61,12 @@ http://127.0.0.1:5174/admin/
 
 In `/admin/`:
 
-1. Enter email/password.
+1. Enter `interioramit26@gmail.com` and your password.
 2. Tick “Create first admin account”.
 3. Submit once.
 4. Untick it for normal sign-in afterward.
+
+The admin panel is intentionally locked to this one email address.
 
 ## 5. Add GitHub repository secrets
 
@@ -88,4 +90,4 @@ Use the included starter files:
 - `firestore.rules`
 - `storage.rules`
 
-Important: replace the admin email in those rules with your real admin email before publishing rules.
+Important: publish both rules files in Firebase Console. They are already locked to `interioramit26@gmail.com`.

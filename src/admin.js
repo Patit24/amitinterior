@@ -18,6 +18,8 @@ import {
 import { deleteObject, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth, db, firebaseReady, storage } from "./firebase.js";
 
+const ADMIN_EMAIL = "interioramit26@gmail.com";
+
 const state = {
   editingPortfolioId: null,
   editingServiceId: null,
@@ -172,14 +174,19 @@ const loadAll = async () => {
 $("#login-form")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!requireFirebase()) return;
-  const email = $("#admin-email").value.trim();
+  const email = $("#admin-email").value.trim().toLowerCase();
   const password = $("#admin-password").value;
   const createAccount = $("#create-account").checked;
+  if (email !== ADMIN_EMAIL) {
+    showStatus(`Only ${ADMIN_EMAIL} can use this admin panel.`, "error");
+    return;
+  }
   setBusy(event.currentTarget, true);
   try {
     if (createAccount) {
       await createUserWithEmailAndPassword(auth, email, password);
-      showStatus("Admin account created. Lock your Firebase rules to admin users only.", "success");
+      $("#create-account").checked = false;
+      showStatus(`Admin account created for ${ADMIN_EMAIL}.`, "success");
     } else {
       await signInWithEmailAndPassword(auth, email, password);
       showStatus("Signed in.", "success");
@@ -354,12 +361,22 @@ if (!firebaseReady) {
   showStatus("Add Firebase environment values, then rebuild/deploy to activate admin features.", "error");
 } else {
   onAuthStateChanged(auth, async (user) => {
-    loginPanel.hidden = Boolean(user);
-    appPanel.hidden = !user;
     if (!user) {
+      loginPanel.hidden = false;
+      appPanel.hidden = true;
       showStatus("Sign in to manage portfolio and services.");
       return;
     }
+    const signedInEmail = user.email?.toLowerCase();
+    if (signedInEmail !== ADMIN_EMAIL) {
+      await signOut(auth);
+      loginPanel.hidden = false;
+      appPanel.hidden = true;
+      showStatus(`Access denied. Only ${ADMIN_EMAIL} can use this admin panel.`, "error");
+      return;
+    }
+    loginPanel.hidden = true;
+    appPanel.hidden = false;
     showStatus(`Signed in as ${user.email}.`, "success");
     await loadAll();
   });
