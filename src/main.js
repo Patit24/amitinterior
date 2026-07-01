@@ -76,12 +76,109 @@ comparisonRange?.addEventListener("input", () => {
   comparison.style.setProperty("--position", `${comparisonRange.value}%`);
 });
 
+const whatsappNumber = "917003033961";
+
+const fieldValue = (form, selector) => form.querySelector(selector)?.value?.trim() || "";
+
+const createWhatsAppMessage = ({
+  name = "",
+  phone = "",
+  email = "",
+  projectType = "",
+  location = "",
+  message = "",
+  source = "Website consultation form",
+} = {}) => {
+  const lines = [
+    "Hello Amit Interior,",
+    "",
+    "I want to book a consultation.",
+    `Source: ${source}`,
+    name && `Name: ${name}`,
+    phone && `Phone: ${phone}`,
+    email && `Email: ${email}`,
+    projectType && `Project type: ${projectType}`,
+    location && `Location: ${location}`,
+    message && `Project details: ${message}`,
+  ].filter(Boolean);
+  return lines.join("\n");
+};
+
+const redirectToWhatsApp = (details) => {
+  const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(createWhatsAppMessage(details))}`;
+  window.location.assign(url);
+};
+
 const form = document.querySelector(".consultation-form");
 form?.addEventListener("submit", (event) => {
   event.preventDefault();
   const status = form.querySelector(".form-status");
-  status.textContent = "Thank you — your consultation request is ready. We’ll contact you shortly.";
+  status.textContent = "Opening WhatsApp with your consultation request…";
+  redirectToWhatsApp({
+    name: fieldValue(form, "[name='name'], #name, #contact-name"),
+    phone: fieldValue(form, "[name='phone'], #phone, #contact-phone"),
+    email: fieldValue(form, "[name='email'], #email, #contact-email"),
+    projectType: fieldValue(form, "[name='project-type'], #project-type, #contact-type"),
+    message: fieldValue(form, "[name='message'], #message, #contact-message"),
+    source: "Home page form",
+  });
   form.reset();
+});
+
+const openConsultationModal = () => {
+  let modal = document.querySelector(".booking-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.className = "booking-modal";
+    modal.setAttribute("aria-hidden", "true");
+    modal.innerHTML = `
+      <div class="booking-modal__backdrop" data-booking-close></div>
+      <section class="booking-modal__panel" role="dialog" aria-modal="true" aria-labelledby="booking-title">
+        <button class="booking-modal__close" type="button" data-booking-close aria-label="Close consultation form">×</button>
+        <p class="eyebrow"><span></span> Book consultation</p>
+        <h2 id="booking-title">Tell us about your dream home.</h2>
+        <form class="booking-form">
+          <label>Name<input name="name" autocomplete="name" required /></label>
+          <label>Phone<input name="phone" type="tel" autocomplete="tel" required /></label>
+          <label>Location<input name="location" autocomplete="street-address" placeholder="Kolkata, Howrah, etc." /></label>
+          <label>Project type<select name="project-type"><option>Full home interior</option><option>Modular kitchen</option><option>Bedroom / furniture</option><option>Renovation</option><option>Office / commercial</option></select></label>
+          <label class="booking-form__wide">Project details<textarea name="message" rows="3" placeholder="Tell us your room size, budget, timeline or idea."></textarea></label>
+          <button class="contact__cta booking-form__submit" type="submit"><span>Send to WhatsApp</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" /></svg></button>
+        </form>
+      </section>
+    `;
+    document.body.appendChild(modal);
+    modal.addEventListener("click", (event) => {
+      if (event.target.closest("[data-booking-close]")) {
+        modal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("booking-open");
+      }
+    });
+    modal.querySelector(".booking-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const bookingForm = event.currentTarget;
+      redirectToWhatsApp({
+        name: fieldValue(bookingForm, "[name='name']"),
+        phone: fieldValue(bookingForm, "[name='phone']"),
+        location: fieldValue(bookingForm, "[name='location']"),
+        projectType: fieldValue(bookingForm, "[name='project-type']"),
+        message: fieldValue(bookingForm, "[name='message']"),
+        source: "Book consultation popup",
+      });
+    });
+  }
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("booking-open");
+  modal.querySelector("[name='name']")?.focus();
+};
+
+document.querySelectorAll("a").forEach((link) => {
+  const label = link.textContent.trim().toLowerCase();
+  if (!/(book consultation|start brief)/.test(label)) return;
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    openConsultationModal();
+  });
 });
 
 const portfolioItems = [
