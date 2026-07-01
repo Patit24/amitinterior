@@ -526,6 +526,10 @@ body.ready .site-header {
   background: #ddd1c0;
 }
 
+.showroom--single {
+  height: 100svh;
+}
+
 .hero__media {
   position: absolute;
   inset: -4%;
@@ -944,6 +948,10 @@ body.ready .hero-proof {
   overflow: hidden;
   transform: translateY(-50%);
   background: rgba(45, 45, 45, 0.2);
+}
+
+.showroom--single .room-progress {
+  display: none;
 }
 
 .room-progress span {
