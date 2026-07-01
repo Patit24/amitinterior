@@ -33,6 +33,45 @@ const setMenu = (open) => {
 menuButton?.addEventListener("click", () => setMenu(menuButton.getAttribute("aria-expanded") !== "true"));
 menu?.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => setMenu(false)));
 
+if (!reduced && window.matchMedia("(pointer: fine)").matches) {
+  const cursor = document.createElement("div");
+  cursor.className = "site-cursor";
+  cursor.setAttribute("aria-hidden", "true");
+  document.body.appendChild(cursor);
+  document.body.classList.add("has-custom-cursor");
+
+  let cursorX = window.innerWidth / 2;
+  let cursorY = window.innerHeight / 2;
+  let renderedCursorX = cursorX;
+  let renderedCursorY = cursorY;
+  let cursorFrame;
+
+  const renderCursor = () => {
+    renderedCursorX += (cursorX - renderedCursorX) * 0.18;
+    renderedCursorY += (cursorY - renderedCursorY) * 0.18;
+    cursor.style.transform = `translate3d(${renderedCursorX}px, ${renderedCursorY}px, 0) translate(-50%, -50%) scale(var(--cursor-scale, 1))`;
+    cursorFrame = requestAnimationFrame(renderCursor);
+  };
+
+  window.addEventListener("pointermove", (event) => {
+    cursorX = event.clientX;
+    cursorY = event.clientY;
+    document.body.classList.add("cursor-ready");
+  }, { passive: true });
+
+  document.addEventListener("pointerover", (event) => {
+    const interactive = event.target.closest("a, button, input, textarea, select, .portfolio-tile, .service-icon-card");
+    document.body.classList.toggle("cursor-hover", Boolean(interactive));
+  });
+
+  document.addEventListener("pointerout", (event) => {
+    if (!event.relatedTarget) document.body.classList.remove("cursor-hover");
+  });
+
+  cursorFrame = requestAnimationFrame(renderCursor);
+  window.addEventListener("pagehide", () => cancelAnimationFrame(cursorFrame), { once: true });
+}
+
 const whatsappNumber = "917003033961";
 const fieldValue = (form, selector) => form.querySelector(selector)?.value?.trim() || "";
 

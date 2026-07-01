@@ -70,6 +70,50 @@ mobileMenu?.querySelectorAll("a").forEach((link) => {
   link.addEventListener("click", () => setMenuState(false));
 });
 
+const finePointer = window.matchMedia("(pointer: fine)").matches;
+
+if (!prefersReducedMotion && finePointer) {
+  const cursor = document.createElement("div");
+  cursor.className = "site-cursor";
+  cursor.setAttribute("aria-hidden", "true");
+  document.body.appendChild(cursor);
+  document.body.classList.add("has-custom-cursor");
+
+  let cursorX = window.innerWidth / 2;
+  let cursorY = window.innerHeight / 2;
+  let renderedCursorX = cursorX;
+  let renderedCursorY = cursorY;
+  let cursorFrame;
+
+  const renderCursor = () => {
+    renderedCursorX += (cursorX - renderedCursorX) * 0.18;
+    renderedCursorY += (cursorY - renderedCursorY) * 0.18;
+    cursor.style.transform = `translate3d(${renderedCursorX}px, ${renderedCursorY}px, 0) translate(-50%, -50%) scale(var(--cursor-scale, 1))`;
+    cursorFrame = requestAnimationFrame(renderCursor);
+  };
+
+  window.addEventListener("pointermove", (event) => {
+    cursorX = event.clientX;
+    cursorY = event.clientY;
+    document.body.classList.add("cursor-ready");
+  }, { passive: true });
+
+  document.addEventListener("pointerover", (event) => {
+    const interactive = event.target.closest("a, button, input, textarea, select, .portfolio-tile, .comparison");
+    document.body.classList.toggle("cursor-hover", Boolean(interactive));
+    document.body.classList.toggle("cursor-hero", Boolean(event.target.closest(".hero")));
+  });
+
+  document.addEventListener("pointerout", (event) => {
+    if (!event.relatedTarget) {
+      document.body.classList.remove("cursor-hover", "cursor-hero");
+    }
+  });
+
+  cursorFrame = requestAnimationFrame(renderCursor);
+  window.addEventListener("pagehide", () => cancelAnimationFrame(cursorFrame), { once: true });
+}
+
 const comparison = document.querySelector(".comparison");
 const comparisonRange = document.querySelector("#comparison-range");
 comparisonRange?.addEventListener("input", () => {
@@ -334,6 +378,8 @@ if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
     const horizontalTravel = currentX * -48;
     const verticalTravel = currentY * -12 + scrollProgress * -18;
     media.style.transform = `translate3d(${horizontalTravel}px, ${verticalTravel}px, 0) scale(1.04)`;
+    hero.style.setProperty("--hero-x", `${58 + currentX * 18}%`);
+    hero.style.setProperty("--hero-y", `${44 + currentY * 18}%`);
     sun.style.transform = `translate3d(${currentX * 22}px, ${currentY * 12}px, 0) rotate(14deg)`;
     materialCards.forEach((card, index) => {
       const depth = index === 0 ? 18 : -14;
