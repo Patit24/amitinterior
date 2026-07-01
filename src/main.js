@@ -85,18 +85,18 @@ form?.addEventListener("submit", (event) => {
 });
 
 const portfolioItems = [
-  { src: "/Images/portfolio/portfolio-01.jpg", title: "Pooja Room", meta: "Custom altar · Lighting", alt: "Completed pooja room with custom altar, marble floor and crystal chandelier" },
-  { src: "/Images/portfolio/portfolio-02.jpg", title: "Devotional Wall", meta: "Marble · Brass inlay", alt: "Marble and gold devotional wall beside the custom pooja room" },
-  { src: "/Images/portfolio/portfolio-03.jpg", title: "Statement Ceiling", meta: "Laser-cut detail · Cove light", alt: "Decorative false ceiling and carved arched doorway in the living room" },
-  { src: "/Images/portfolio/portfolio-04.jpg", title: "TV Wall", meta: "Marble · Fluted panel", alt: "Teal sectional sofa facing a marble and gold television wall" },
-  { src: "/Images/portfolio/portfolio-05.jpg", title: "Sacred Threshold", meta: "Hand-carved timber", alt: "Carved double doors opening into the illuminated pooja room" },
-  { src: "/Images/portfolio/portfolio-06.jpg", title: "Display Wall", meta: "Timber · Integrated light", alt: "Bespoke illuminated display storage behind a teal living room sofa" },
-  { src: "/Images/portfolio/portfolio-07.jpg", title: "Carved Entrance", meta: "Timber · Decorative panels", alt: "Carved arched timber door framed by decorative wall panels" },
-  { src: "/Images/portfolio/portfolio-08.jpg", title: "Living Composition", meta: "Bespoke furniture", alt: "Full living room view with teal sofa, marble TV wall and display cabinetry" },
-  { src: "/Images/portfolio/portfolio-09.jpg", title: "Glass Partition", meta: "Etched leaf pattern", alt: "Leaf-pattern etched glass sliding partition" },
-  { src: "/Images/portfolio/portfolio-10.jpg", title: "Ceiling Geometry", meta: "Layered ambient lighting", alt: "Living room with illuminated leaf-pattern false ceiling" },
-  { src: "/Images/portfolio/portfolio-11.jpg", title: "Mirror Nook", meta: "Upholstery · Wardrobe", alt: "Upholstered bench beneath a diamond-cut mirror wall and fitted storage" },
-  { src: "/Images/portfolio/portfolio-12.jpg", title: "Completed Living Room", meta: "Final reveal", alt: "Wide view of the completed living room with statement ceiling and custom sofa" },
+  { src: "/Images/portfolio/portfolio-01.jpg", title: "Bedroom Media Wall", meta: "Wardrobe · TV unit", alt: "Bedroom media wall with wardrobe and TV unit" },
+  { src: "/Images/portfolio/portfolio-02.jpg", title: "Soft Bedroom Suite", meta: "Neutral palette · Warm light", alt: "Neutral bedroom suite with bed, side table and warm lighting" },
+  { src: "/Images/portfolio/portfolio-03.jpg", title: "Compact TV Console", meta: "Storage · Back panel", alt: "Compact TV console with storage and vertical wall panel" },
+  { src: "/Images/portfolio/portfolio-04.jpg", title: "Staircase Lobby", meta: "Glass rail · Wall finish", alt: "Bright staircase lobby with glass railing and wall art" },
+  { src: "/Images/portfolio/portfolio-05.jpg", title: "Vanity Storage", meta: "Mirror · Display shelves", alt: "Modern vanity storage with mirror and display shelves" },
+  { src: "/Images/portfolio/portfolio-06.jpg", title: "Floating TV Unit", meta: "Panel · Drawer storage", alt: "Floating TV unit with drawers and soft neutral paneling" },
+  { src: "/Images/portfolio/portfolio-07.jpg", title: "Living TV Wall", meta: "Fluted panel · Cove light", alt: "Living room TV wall with fluted panel and ceiling light" },
+  { src: "/Images/portfolio/portfolio-08.jpg", title: "Bedroom Feature Wall", meta: "Arch detail · Ceiling fan", alt: "Bedroom feature wall with arched headboard and ceiling fan" },
+  { src: "/Images/portfolio/portfolio-09.jpg", title: "Entrance Wall Finish", meta: "Stone texture · Door detail", alt: "Entrance wall with textured finish and geometric door detail" },
+  { src: "/Images/portfolio/portfolio-10.jpg", title: "Study Wardrobe Unit", meta: "Desk · Open shelves", alt: "Compact study and wardrobe unit with open shelves" },
+  { src: "/Images/portfolio/portfolio-11.jpg", title: "Daybed Nook", meta: "Storage · Soft seating", alt: "Soft daybed nook with wall storage and lighting" },
+  { src: "/Images/portfolio/portfolio-12.jpg", title: "Open Living Room", meta: "Seating · Display wall", alt: "Open living room with sofa, display wall and dining connection" },
 ];
 
 const filterButtons = [...document.querySelectorAll(".portfolio-filters button")];
