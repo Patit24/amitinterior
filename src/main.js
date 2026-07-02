@@ -1,3 +1,14 @@
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+const heroFrameModules = import.meta.glob("../Images/hero-sequence/*.{webp,png,jpg,jpeg}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
+
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const preloader = document.querySelector(".preloader");
 const count = document.querySelector(".preloader__count");
@@ -324,67 +335,179 @@ const hero = document.querySelector(".hero");
 const media = document.querySelector(".hero__media");
 const sun = document.querySelector(".hero__sun");
 const materialCards = [...document.querySelectorAll(".hero__material-card")];
-const scenes = [...document.querySelectorAll(".room-scene")];
 const roomIndex = document.querySelector(".room-status__index");
 const roomName = document.querySelector(".room-status strong");
 const progressBar = document.querySelector(".room-progress span");
-let activeScene = 0;
-let scrollProgress = 0;
 let targetX = 0;
 let targetY = 0;
 let currentX = 0;
 let currentY = 0;
-let ticking = false;
+let scrollProgress = 0;
+let sequenceFrame;
 
-const updateShowroom = () => {
-  if (!showroom) return;
-  const start = showroom.offsetTop;
-  const distance = Math.max(showroom.offsetHeight - window.innerHeight, 1);
-  scrollProgress = Math.min(Math.max((window.scrollY - start) / distance, 0), 1);
-  const nextScene = Math.min(Math.floor(scrollProgress * scenes.length), scenes.length - 1);
+const orderedFrameUrls = Object.entries(heroFrameModules)
+  .sort(([a], [b]) => {
+    const numberA = Number(a.match(/(\d+)(?=\.[^.]+$)/)?.[1] || 0);
+    const numberB = Number(b.match(/(\d+)(?=\.[^.]+$)/)?.[1] || 0);
+    return numberA - numberB || a.localeCompare(b);
+  })
+  .map(([, url]) => url);
 
-  if (nextScene !== activeScene) {
-    scenes[activeScene]?.classList.remove("is-active");
-    scenes[nextScene]?.classList.add("is-active");
-    activeScene = nextScene;
-    roomIndex.textContent = String(nextScene + 1).padStart(2, "0");
-    roomName.textContent = scenes[nextScene].dataset.room;
-  }
+const setHeaderState = () => header?.classList.toggle("is-scrolled", window.scrollY > 70);
+window.addEventListener("scroll", setHeaderState, { passive: true });
+setHeaderState();
 
-  progressBar.style.transform = `scaleY(${scrollProgress})`;
-  header?.classList.toggle("is-scrolled", window.scrollY > 70);
-  ticking = false;
+const setHeroOverlay = (progress) => {
+  if (!hero) return;
+  const fadeOutStart = 0.62;
+  const fadeOutEnd = 0.82;
+  const fadeOut = progress <= fadeOutStart ? 1 : Math.max(0, 1 - (progress - fadeOutStart) / (fadeOutEnd - fadeOutStart));
+  const opacity = fadeOut;
+  const lift = -28 * (1 - fadeOut);
+  const blur = 7 * (1 - fadeOut);
+  [document.querySelector(".hero__content"), document.querySelector(".hero__dock"), document.querySelector(".hero__footer")].forEach((element) => {
+    if (!element) return;
+    element.style.opacity = opacity.toFixed(3);
+    element.style.transform = `translate3d(0, ${lift.toFixed(2)}px, 0)`;
+    element.style.filter = `blur(${blur.toFixed(2)}px)`;
+    element.style.pointerEvents = opacity > 0.16 ? "" : "none";
+  });
+  materialCards.forEach((card, index) => {
+    const cardOpacity = Math.max(0, Math.min(1, (0.76 - progress) / 0.22));
+    card.style.opacity = cardOpacity.toFixed(3);
+    card.style.filter = `blur(${(1 - cardOpacity) * 7}px)`;
+    card.style.transform = `translate3d(${currentX * (index === 0 ? 18 : -14)}px, ${currentY * (index === 0 ? 10 : -8) + progress * (index === 0 ? -18 : 12)}px, 0)`;
+  });
+  progressBar?.style.setProperty("transform", `scaleY(${progress})`);
+  if (roomIndex) roomIndex.textContent = String(Math.round(progress * 95) + 1).padStart(2, "0");
+  if (roomName) roomName.textContent = progress < 0.82 ? "Scroll reveal" : "Design complete";
 };
 
-window.addEventListener(
-  "scroll",
-  () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(updateShowroom);
-  },
-  { passive: true },
-);
+const drawImageCover = (context, image, canvas) => {
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
+  const imageWidth = image.naturalWidth || image.width;
+  const imageHeight = image.naturalHeight || image.height;
+  const scale = Math.max(canvasWidth / imageWidth, canvasHeight / imageHeight);
+  const width = imageWidth * scale;
+  const height = imageHeight * scale;
+  const x = (canvasWidth - width) / 2;
+  const y = (canvasHeight - height) / 2;
+  context.clearRect(0, 0, canvasWidth, canvasHeight);
+  context.drawImage(image, x, y, width, height);
+};
 
-updateShowroom();
+const initHeroSequence = async () => {
+  const canvas = document.querySelector(".hero__canvas");
+  const loader = document.querySelector(".hero-sequence-loader");
+  const loaderCount = loader?.querySelector("b");
+  if (!showroom || !hero || !canvas || !orderedFrameUrls.length) return;
 
-if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
+  const context = canvas.getContext("2d", { alpha: false });
+  const images = new Array(orderedFrameUrls.length);
+  const playhead = { frame: 0 };
+  const rendered = { frame: 0 };
+  let loaded = 0;
+  let canvasWidth = 0;
+  let canvasHeight = 0;
+
+  const resizeCanvas = () => {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const nextWidth = Math.max(1, Math.floor(rect.width * dpr));
+    const nextHeight = Math.max(1, Math.floor(rect.height * dpr));
+    if (nextWidth === canvasWidth && nextHeight === canvasHeight) return;
+    canvasWidth = nextWidth;
+    canvasHeight = nextHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    drawImageCover(context, images[Math.round(rendered.frame)] || images[0], canvas);
+  };
+
+  const render = () => {
+    const target = playhead.frame;
+    rendered.frame += (target - rendered.frame) * 0.18;
+    if (Math.abs(target - rendered.frame) < 0.025) rendered.frame = target;
+    const image = images[Math.round(rendered.frame)];
+    if (image) drawImageCover(context, image, canvas);
+    sequenceFrame = requestAnimationFrame(render);
+  };
+
+  const preloadFrame = (url, index) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = async () => {
+      images[index] = image;
+      loaded += 1;
+      if (loaderCount) loaderCount.textContent = String(Math.round((loaded / orderedFrameUrls.length) * 100));
+      if (index === 0) {
+        resizeCanvas();
+        drawImageCover(context, image, canvas);
+      }
+      try {
+        await image.decode?.();
+      } catch {
+        // Already loaded; decode support varies.
+      }
+      resolve(image);
+    };
+    image.onerror = reject;
+    image.src = url;
+  });
+
+  await Promise.all(orderedFrameUrls.map(preloadFrame));
+
+  resizeCanvas();
+  hero.classList.add("is-sequence-ready");
+  setHeroOverlay(0);
+
+  if (prefersReducedMotion) {
+    rendered.frame = 0;
+    drawImageCover(context, images[0], canvas);
+    setHeroOverlay(0);
+    return;
+  }
+
+  render();
+
+  gsap.to(playhead, {
+    frame: orderedFrameUrls.length - 1,
+    ease: "none",
+    scrollTrigger: {
+      trigger: showroom,
+      start: "top top",
+      end: "+=300%",
+      scrub: 0.9,
+      pin: hero,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        scrollProgress = self.progress;
+        setHeroOverlay(self.progress);
+      },
+    },
+  });
+
+  window.addEventListener("resize", () => {
+    resizeCanvas();
+    ScrollTrigger.refresh();
+  }, { passive: true });
+};
+
+initHeroSequence().catch((error) => {
+  console.warn("Hero sequence fallback active.", error);
+  hero?.classList.add("is-sequence-ready");
+});
+
+if (!prefersReducedMotion && finePointer && hero) {
   let frame;
 
   const renderParallax = () => {
     currentX += (targetX - currentX) * 0.05;
     currentY += (targetY - currentY) * 0.05;
-    const horizontalTravel = currentX * -48;
-    const verticalTravel = currentY * -12 + scrollProgress * -18;
-    media.style.transform = `translate3d(${horizontalTravel}px, ${verticalTravel}px, 0) scale(1.04)`;
     hero.style.setProperty("--hero-x", `${58 + currentX * 18}%`);
     hero.style.setProperty("--hero-y", `${44 + currentY * 18}%`);
-    sun.style.transform = `translate3d(${currentX * 22}px, ${currentY * 12}px, 0) rotate(14deg)`;
-    materialCards.forEach((card, index) => {
-      const depth = index === 0 ? 18 : -14;
-      const lift = index === 0 ? -scrollProgress * 22 : scrollProgress * 16;
-      card.style.transform = `translate3d(${currentX * depth}px, ${currentY * depth * 0.55 + lift}px, 0)`;
-    });
+    if (sun) sun.style.transform = `translate3d(${currentX * 22}px, ${currentY * 12}px, 0) rotate(14deg)`;
     frame = requestAnimationFrame(renderParallax);
   };
 
@@ -401,17 +524,23 @@ if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
 
   frame = requestAnimationFrame(renderParallax);
   window.addEventListener("pagehide", () => cancelAnimationFrame(frame), { once: true });
-
-  document.querySelectorAll(".magnetic").forEach((element) => {
-    element.addEventListener("pointermove", (event) => {
-      const rect = element.getBoundingClientRect();
-      const x = event.clientX - rect.left - rect.width / 2;
-      const y = event.clientY - rect.top - rect.height / 2;
-      element.style.transform = `translate3d(${x * 0.08}px, ${y * 0.1}px, 0)`;
-    });
-
-    element.addEventListener("pointerleave", () => {
-      element.style.transform = "translate3d(0, 0, 0)";
-    });
-  });
 }
+
+document.querySelectorAll(".magnetic").forEach((element) => {
+  element.addEventListener("pointermove", (event) => {
+    if (prefersReducedMotion) return;
+    const rect = element.getBoundingClientRect();
+    const x = event.clientX - rect.left - rect.width / 2;
+    const y = event.clientY - rect.top - rect.height / 2;
+    element.style.transform = `translate3d(${x * 0.08}px, ${y * 0.1}px, 0)`;
+  });
+
+  element.addEventListener("pointerleave", () => {
+    element.style.transform = "translate3d(0, 0, 0)";
+  });
+});
+
+window.addEventListener("pagehide", () => {
+  if (sequenceFrame) cancelAnimationFrame(sequenceFrame);
+  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+}, { once: true });

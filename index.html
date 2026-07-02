@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="preload" as="image" href="/Images/hero/hero-living-room.png" />
+    <link rel="preload" as="image" href="/Images/hero-sequence/frame_001.webp" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body class="is-loading">
@@ -79,13 +79,17 @@
     <main id="main">
       <div class="showroom showroom--single" id="home">
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero__media" aria-live="polite">
+        <div class="hero__media hero__sequence" aria-live="polite">
+          <canvas class="hero__canvas" width="1280" height="720" aria-hidden="true"></canvas>
           <img
-            class="room-scene is-active"
-            data-room="Living"
+            class="hero__fallback-image"
             src="/Images/hero/hero-living-room.png"
             alt="Sunlit luxury living room with warm timber details and soft neutral furniture"
           />
+          <div class="hero-sequence-loader" role="status" aria-live="polite">
+            <span>Preparing cinematic room reveal</span>
+            <strong><b>0</b>%</strong>
+          </div>
         </div>
         <div class="hero__ambient" aria-hidden="true"></div>
         <div class="hero__grid" aria-hidden="true"></div>
