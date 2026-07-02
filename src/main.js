@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,6 +13,21 @@ const heroFrameModules = import.meta.glob("../Images/hero-sequence/*.{webp,png,j
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const preloader = document.querySelector(".preloader");
 const count = document.querySelector(".preloader__count");
+let lenis;
+
+if (!prefersReducedMotion) {
+  lenis = new Lenis({
+    duration: 1.35,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smoothWheel: true,
+    syncTouch: false,
+    wheelMultiplier: 0.82,
+    touchMultiplier: 1,
+  });
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add((time) => lenis.raf(time * 1000));
+  gsap.ticker.lagSmoothing(0);
+}
 
 const unlockPage = () => {
   document.body.classList.remove("is-loading");
@@ -410,10 +426,13 @@ const initHeroSequence = async () => {
   let loaded = 0;
   let canvasWidth = 0;
   let canvasHeight = 0;
+  let currentFrameIndex = 0;
 
   const resizeCanvas = () => {
     const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const viewportWidth = window.innerWidth || rect.width;
+    const maxDpr = viewportWidth <= 640 ? 1.2 : viewportWidth <= 1024 ? 1.5 : 2;
+    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
     const nextWidth = Math.max(1, Math.floor(rect.width * dpr));
     const nextHeight = Math.max(1, Math.floor(rect.height * dpr));
     if (nextWidth === canvasWidth && nextHeight === canvasHeight) return;
@@ -421,14 +440,15 @@ const initHeroSequence = async () => {
     canvasHeight = nextHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    drawImageCover(context, images[Math.round(rendered.frame)] || images[0], canvas);
+    drawImageCover(context, images[currentFrameIndex] || images[0], canvas);
   };
 
   const render = () => {
     const target = playhead.frame;
     rendered.frame += (target - rendered.frame) * 0.18;
     if (Math.abs(target - rendered.frame) < 0.025) rendered.frame = target;
-    const image = images[Math.round(rendered.frame)];
+    currentFrameIndex = Math.round(rendered.frame);
+    const image = images[currentFrameIndex];
     if (image) drawImageCover(context, image, canvas);
     sequenceFrame = requestAnimationFrame(render);
   };
@@ -476,8 +496,8 @@ const initHeroSequence = async () => {
     scrollTrigger: {
       trigger: showroom,
       start: "top top",
-      end: "+=300%",
-      scrub: 0.9,
+      end: "+=400%",
+      scrub: 1.8,
       pin: hero,
       anticipatePin: 1,
       invalidateOnRefresh: true,
@@ -542,5 +562,6 @@ document.querySelectorAll(".magnetic").forEach((element) => {
 
 window.addEventListener("pagehide", () => {
   if (sequenceFrame) cancelAnimationFrame(sequenceFrame);
+  lenis?.destroy();
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 }, { once: true });
