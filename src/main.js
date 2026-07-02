@@ -145,7 +145,7 @@ const createWhatsAppMessage = ({
   source = "Website consultation form",
 } = {}) => {
   const lines = [
-    "Hello Amit Interior,",
+    "Hello Interior Amit,",
     "",
     "I want to book a consultation.",
     `Source: ${source}`,

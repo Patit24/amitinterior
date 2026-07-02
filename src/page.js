@@ -84,7 +84,7 @@ const createWhatsAppMessage = ({
   message = "",
   source = "Website consultation form",
 } = {}) => [
-  "Hello Amit Interior,",
+  "Hello Interior Amit,",
   "",
   "I want to book a consultation.",
   `Source: ${source}`,
@@ -291,7 +291,7 @@ const renderFirebaseServices = async () => {
         return `
           <article id="${service.slug || service.id}" class="service-scope-card${wideClass} reveal" style="--i: ${index}">
             <a href="${sitePath("contact/")}" aria-label="Discuss ${service.title || "service"}">
-              <figure><img src="${service.imageUrl || fallbackServiceImage}" alt="${service.title || "Amit Interior service"}" loading="lazy" /></figure>
+              <figure><img src="${service.imageUrl || fallbackServiceImage}" alt="${service.title || "Interior Amit service"}" loading="lazy" /></figure>
               <div class="service-scope-card__content">
                 <span>${service.label || service.slug || "Service"}</span>
                 <h3>${service.title || "Interior service"}</h3>

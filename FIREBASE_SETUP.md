@@ -1,4 +1,4 @@
-# Amit Interior Firebase Admin Setup
+# Interior Amit Firebase Admin Setup
 
 This project now has a Firebase-powered admin panel at:
 
