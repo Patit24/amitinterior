@@ -96,8 +96,8 @@ select:disabled {
 .admin-brand img {
   width: 76px;
   height: 76px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.8);
+  border-radius: 18px;
+  background: #191715;
   object-fit: contain;
 }
 

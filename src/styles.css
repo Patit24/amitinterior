@@ -445,11 +445,13 @@ a {
 }
 
 .preloader__logo {
-  width: 250px;
+  width: min(310px, 72vw);
+  border-radius: 30px;
   opacity: 0;
-  mix-blend-mode: multiply;
+  mix-blend-mode: normal;
   transform: translateY(10px);
   filter: blur(7px);
+  box-shadow: 0 28px 80px rgba(20, 18, 16, 0.18);
   animation: logo-in 0.9s var(--ease-out) 1.15s forwards;
 }
 
@@ -591,17 +593,19 @@ body.ready .site-header {
 
 .brand {
   display: block;
-  width: 102px;
-  height: 62px;
-  overflow: hidden;
+  width: 96px;
+  height: 72px;
+  overflow: visible;
 }
 
 .brand img {
-  width: 102px;
-  height: 102px;
-  margin-top: -19px;
-  object-fit: cover;
-  mix-blend-mode: multiply;
+  width: 100%;
+  height: 100%;
+  margin-top: 0;
+  border-radius: 16px;
+  object-fit: contain;
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 10px 20px rgba(49, 43, 35, 0.08));
 }
 
 .desktop-nav {
@@ -2646,13 +2650,14 @@ body.ready .hero__footer {
   }
 
   .brand {
-    width: 82px;
+    width: 74px;
+    height: 58px;
   }
 
   .brand img {
-    width: 88px;
-    height: 88px;
-    margin-top: -13px;
+    width: 100%;
+    height: 100%;
+    margin-top: 0;
   }
 
   .header-cta {
