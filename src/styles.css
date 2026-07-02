@@ -2531,6 +2531,8 @@ body.ready .hero__footer {
   bottom: 30px;
   left: var(--gutter);
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
   justify-content: space-between;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.3);
@@ -2541,6 +2543,17 @@ body.ready .hero__footer {
 
 .contact footer p {
   margin: 0;
+}
+
+.developer-credit {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.developer-credit:hover {
+  color: var(--taupe);
+  opacity: 0.9;
 }
 
 .reveal {
