@@ -231,7 +231,6 @@ const portfolioItems = [
   { src: "/Images/portfolio/portfolio-03.jpg", title: "Compact TV Console", meta: "Storage · Back panel", alt: "Compact TV console with storage and vertical wall panel" },
   { src: "/Images/portfolio/portfolio-04.jpg", title: "Staircase Lobby", meta: "Glass rail · Wall finish", alt: "Bright staircase lobby with glass railing and wall art" },
   { src: "/Images/portfolio/portfolio-05.jpg", title: "Vanity Storage", meta: "Mirror · Display shelves", alt: "Modern vanity storage with mirror and display shelves" },
-  { src: "/Images/portfolio/portfolio-06.jpg", title: "Floating TV Unit", meta: "Panel · Drawer storage", alt: "Floating TV unit with drawers and soft neutral paneling" },
   { src: "/Images/portfolio/portfolio-07.jpg", title: "Living TV Wall", meta: "Fluted panel · Cove light", alt: "Living room TV wall with fluted panel and ceiling light" },
   { src: "/Images/portfolio/portfolio-08.jpg", title: "Bedroom Feature Wall", meta: "Arch detail · Ceiling fan", alt: "Bedroom feature wall with arched headboard and ceiling fan" },
   { src: "/Images/portfolio/portfolio-09.jpg", title: "Entrance Wall Finish", meta: "Stone texture · Door detail", alt: "Entrance wall with textured finish and geometric door detail" },
