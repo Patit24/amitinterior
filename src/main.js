@@ -4,11 +4,7 @@ import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const heroFrameModules = import.meta.glob("../Images/hero-sequence/*.{webp,png,jpg,jpeg}", {
-  eager: true,
-  query: "?url",
-  import: "default",
-});
+
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const preloader = document.querySelector(".preloader");
@@ -97,49 +93,7 @@ mobileMenu?.querySelectorAll("a").forEach((link) => {
   link.addEventListener("click", () => setMenuState(false));
 });
 
-const finePointer = window.matchMedia("(pointer: fine)").matches;
 
-if (!prefersReducedMotion && finePointer) {
-  const cursor = document.createElement("div");
-  cursor.className = "site-cursor";
-  cursor.setAttribute("aria-hidden", "true");
-  document.body.appendChild(cursor);
-  document.body.classList.add("has-custom-cursor");
-
-  let cursorX = window.innerWidth / 2;
-  let cursorY = window.innerHeight / 2;
-  let renderedCursorX = cursorX;
-  let renderedCursorY = cursorY;
-  let cursorFrame;
-
-  const renderCursor = () => {
-    renderedCursorX += (cursorX - renderedCursorX) * 0.18;
-    renderedCursorY += (cursorY - renderedCursorY) * 0.18;
-    cursor.style.transform = `translate3d(${renderedCursorX}px, ${renderedCursorY}px, 0) translate(-50%, -50%) scale(var(--cursor-scale, 1))`;
-    cursorFrame = requestAnimationFrame(renderCursor);
-  };
-
-  window.addEventListener("pointermove", (event) => {
-    cursorX = event.clientX;
-    cursorY = event.clientY;
-    document.body.classList.add("cursor-ready");
-  }, { passive: true });
-
-  document.addEventListener("pointerover", (event) => {
-    const interactive = event.target.closest("a, button, input, textarea, select, .portfolio-tile, .comparison");
-    document.body.classList.toggle("cursor-hover", Boolean(interactive));
-    document.body.classList.toggle("cursor-hero", Boolean(event.target.closest(".hero")));
-  });
-
-  document.addEventListener("pointerout", (event) => {
-    if (!event.relatedTarget) {
-      document.body.classList.remove("cursor-hover", "cursor-hero");
-    }
-  });
-
-  cursorFrame = requestAnimationFrame(renderCursor);
-  window.addEventListener("pagehide", () => cancelAnimationFrame(cursorFrame), { once: true });
-}
 
 const comparison = document.querySelector(".comparison");
 const comparisonRange = document.querySelector("#comparison-range");
@@ -346,204 +300,46 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowRight") renderViewer(viewerIndex + 1);
 });
 
-const showroom = document.querySelector(".showroom");
-const hero = document.querySelector(".hero");
-const media = document.querySelector(".hero__media");
-const sun = document.querySelector(".hero__sun");
-const materialCards = [...document.querySelectorAll(".hero__material-card")];
-const roomIndex = document.querySelector(".room-status__index");
-const roomName = document.querySelector(".room-status strong");
-const progressBar = document.querySelector(".room-progress span");
-let targetX = 0;
-let targetY = 0;
-let currentX = 0;
-let currentY = 0;
-let scrollProgress = 0;
-let sequenceFrame;
-
-const orderedFrameUrls = Object.entries(heroFrameModules)
-  .sort(([a], [b]) => {
-    const numberA = Number(a.match(/(\d+)(?=\.[^.]+$)/)?.[1] || 0);
-    const numberB = Number(b.match(/(\d+)(?=\.[^.]+$)/)?.[1] || 0);
-    return numberA - numberB || a.localeCompare(b);
-  })
-  .map(([, url]) => url);
-
 const setHeaderState = () => header?.classList.toggle("is-scrolled", window.scrollY > 70);
 window.addEventListener("scroll", setHeaderState, { passive: true });
 setHeaderState();
 
-const setHeroOverlay = (progress) => {
-  if (!hero) return;
-  const fadeOutStart = 0.62;
-  const fadeOutEnd = 0.82;
-  const fadeOut = progress <= fadeOutStart ? 1 : Math.max(0, 1 - (progress - fadeOutStart) / (fadeOutEnd - fadeOutStart));
-  const opacity = fadeOut;
-  const lift = -28 * (1 - fadeOut);
-  const blur = 7 * (1 - fadeOut);
-  [document.querySelector(".hero__content"), document.querySelector(".hero__dock"), document.querySelector(".hero__footer")].forEach((element) => {
-    if (!element) return;
-    element.style.opacity = opacity.toFixed(3);
-    element.style.transform = `translate3d(0, ${lift.toFixed(2)}px, 0)`;
-    element.style.filter = `blur(${blur.toFixed(2)}px)`;
-    element.style.pointerEvents = opacity > 0.16 ? "" : "none";
-  });
-  materialCards.forEach((card, index) => {
-    const cardOpacity = Math.max(0, Math.min(1, (0.76 - progress) / 0.22));
-    card.style.opacity = cardOpacity.toFixed(3);
-    card.style.filter = `blur(${(1 - cardOpacity) * 7}px)`;
-    card.style.transform = `translate3d(${currentX * (index === 0 ? 18 : -14)}px, ${currentY * (index === 0 ? 10 : -8) + progress * (index === 0 ? -18 : 12)}px, 0)`;
-  });
-  progressBar?.style.setProperty("transform", `scaleY(${progress})`);
-  if (roomIndex) roomIndex.textContent = String(Math.round(progress * 95) + 1).padStart(2, "0");
-  if (roomName) roomName.textContent = progress < 0.82 ? "Scroll reveal" : "Design complete";
-};
+const hero = document.querySelector(".hero");
+const video = document.querySelector(".hero__video");
+const soundToggle = document.querySelector(".hero__sound-toggle");
+const soundOnIcon = soundToggle?.querySelector(".sound-icon--on");
+const soundOffIcon = soundToggle?.querySelector(".sound-icon--off");
+const soundLabel = soundToggle?.querySelector(".hero__sound-label");
 
-const drawImageCover = (context, image, canvas) => {
-  const canvasWidth = canvas.width;
-  const canvasHeight = canvas.height;
-  const imageWidth = image.naturalWidth || image.width;
-  const imageHeight = image.naturalHeight || image.height;
-  const scale = Math.max(canvasWidth / imageWidth, canvasHeight / imageHeight);
-  const width = imageWidth * scale;
-  const height = imageHeight * scale;
-  const x = (canvasWidth - width) / 2;
-  const y = (canvasHeight - height) / 2;
-  context.clearRect(0, 0, canvasWidth, canvasHeight);
-  context.drawImage(image, x, y, width, height);
-};
+if (video && hero) {
+  video.addEventListener("playing", () => {
+    hero.classList.add("is-video-playing");
+  }, { once: true });
 
-const initHeroSequence = async () => {
-  const canvas = document.querySelector(".hero__canvas");
-  const loader = document.querySelector(".hero-sequence-loader");
-  const loaderCount = loader?.querySelector("b");
-  if (!showroom || !hero || !canvas || !orderedFrameUrls.length) return;
-
-  const context = canvas.getContext("2d", { alpha: false });
-  const images = new Array(orderedFrameUrls.length);
-  const playhead = { frame: 0 };
-  const rendered = { frame: 0 };
-  let loaded = 0;
-  let canvasWidth = 0;
-  let canvasHeight = 0;
-  let currentFrameIndex = 0;
-
-  const resizeCanvas = () => {
-    const rect = canvas.getBoundingClientRect();
-    const viewportWidth = window.innerWidth || rect.width;
-    const maxDpr = viewportWidth <= 640 ? 1.2 : viewportWidth <= 1024 ? 1.5 : 2;
-    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
-    const nextWidth = Math.max(1, Math.floor(rect.width * dpr));
-    const nextHeight = Math.max(1, Math.floor(rect.height * dpr));
-    if (nextWidth === canvasWidth && nextHeight === canvasHeight) return;
-    canvasWidth = nextWidth;
-    canvasHeight = nextHeight;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    drawImageCover(context, images[currentFrameIndex] || images[0], canvas);
-  };
-
-  const render = () => {
-    const target = playhead.frame;
-    rendered.frame += (target - rendered.frame) * 0.18;
-    if (Math.abs(target - rendered.frame) < 0.025) rendered.frame = target;
-    currentFrameIndex = Math.round(rendered.frame);
-    const image = images[currentFrameIndex];
-    if (image) drawImageCover(context, image, canvas);
-    sequenceFrame = requestAnimationFrame(render);
-  };
-
-  const preloadFrame = (url, index) => new Promise((resolve, reject) => {
-    const image = new Image();
-    image.decoding = "async";
-    image.onload = async () => {
-      images[index] = image;
-      loaded += 1;
-      if (loaderCount) loaderCount.textContent = String(Math.round((loaded / orderedFrameUrls.length) * 100));
-      if (index === 0) {
-        resizeCanvas();
-        drawImageCover(context, image, canvas);
-      }
-      try {
-        await image.decode?.();
-      } catch {
-        // Already loaded; decode support varies.
-      }
-      resolve(image);
-    };
-    image.onerror = reject;
-    image.src = url;
+  // Autoplay recovery (try with sound first, if blocked, play muted)
+  video.play().catch((error) => {
+    console.log("Autoplay with sound blocked by browser. Playing muted as fallback.", error);
+    video.muted = true;
+    video.play();
+    if (soundOnIcon) soundOnIcon.setAttribute("hidden", "true");
+    if (soundOffIcon) soundOffIcon.removeAttribute("hidden");
+    if (soundLabel) soundLabel.textContent = "Sound off";
   });
 
-  await Promise.all(orderedFrameUrls.map(preloadFrame));
-
-  resizeCanvas();
-  hero.classList.add("is-sequence-ready");
-  setHeroOverlay(0);
-
-  if (prefersReducedMotion) {
-    rendered.frame = 0;
-    drawImageCover(context, images[0], canvas);
-    setHeroOverlay(0);
-    return;
-  }
-
-  render();
-
-  gsap.to(playhead, {
-    frame: orderedFrameUrls.length - 1,
-    ease: "none",
-    scrollTrigger: {
-      trigger: showroom,
-      start: "top top",
-      end: "+=400%",
-      scrub: 1.8,
-      pin: hero,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        scrollProgress = self.progress;
-        setHeroOverlay(self.progress);
-      },
-    },
+  // Sound toggle button click handler
+  soundToggle?.addEventListener("click", () => {
+    if (video.muted) {
+      video.muted = false;
+      soundOnIcon?.removeAttribute("hidden");
+      soundOffIcon?.setAttribute("hidden", "true");
+      if (soundLabel) soundLabel.textContent = "Sound on";
+    } else {
+      video.muted = true;
+      soundOnIcon?.setAttribute("hidden", "true");
+      soundOffIcon?.removeAttribute("hidden");
+      if (soundLabel) soundLabel.textContent = "Sound off";
+    }
   });
-
-  window.addEventListener("resize", () => {
-    resizeCanvas();
-    ScrollTrigger.refresh();
-  }, { passive: true });
-};
-
-initHeroSequence().catch((error) => {
-  console.warn("Hero sequence fallback active.", error);
-  hero?.classList.add("is-sequence-ready");
-});
-
-if (!prefersReducedMotion && finePointer && hero) {
-  let frame;
-
-  const renderParallax = () => {
-    currentX += (targetX - currentX) * 0.05;
-    currentY += (targetY - currentY) * 0.05;
-    hero.style.setProperty("--hero-x", `${58 + currentX * 18}%`);
-    hero.style.setProperty("--hero-y", `${44 + currentY * 18}%`);
-    if (sun) sun.style.transform = `translate3d(${currentX * 22}px, ${currentY * 12}px, 0) rotate(14deg)`;
-    frame = requestAnimationFrame(renderParallax);
-  };
-
-  hero.addEventListener("pointermove", (event) => {
-    const rect = hero.getBoundingClientRect();
-    targetX = (event.clientX - rect.left) / rect.width - 0.5;
-    targetY = (event.clientY - rect.top) / rect.height - 0.5;
-  });
-
-  hero.addEventListener("pointerleave", () => {
-    targetX = 0;
-    targetY = 0;
-  });
-
-  frame = requestAnimationFrame(renderParallax);
-  window.addEventListener("pagehide", () => cancelAnimationFrame(frame), { once: true });
 }
 
 document.querySelectorAll(".magnetic").forEach((element) => {
@@ -561,7 +357,6 @@ document.querySelectorAll(".magnetic").forEach((element) => {
 });
 
 window.addEventListener("pagehide", () => {
-  if (sequenceFrame) cancelAnimationFrame(sequenceFrame);
   lenis?.destroy();
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 }, { once: true });
