@@ -2632,6 +2632,11 @@ body.ready .hero__footer {
 @media (max-width: 900px) {
   .site-header {
     grid-template-columns: 1fr auto;
+    pointer-events: none;
+  }
+
+  .site-header > * {
+    pointer-events: auto;
   }
 
   .desktop-nav {
