@@ -1,15 +1,10 @@
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-
-gsap.registerPlugin(ScrollTrigger);
-
-
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const preloader = document.querySelector(".preloader");
 const count = document.querySelector(".preloader__count");
 let lenis;
+let rafId;
 
 if (!prefersReducedMotion) {
   lenis = new Lenis({
@@ -20,9 +15,12 @@ if (!prefersReducedMotion) {
     wheelMultiplier: 0.82,
     touchMultiplier: 1,
   });
-  lenis.on("scroll", ScrollTrigger.update);
-  gsap.ticker.add((time) => lenis.raf(time * 1000));
-  gsap.ticker.lagSmoothing(0);
+
+  const frame = (time) => {
+    lenis.raf(time);
+    rafId = requestAnimationFrame(frame);
+  };
+  rafId = requestAnimationFrame(frame);
 }
 
 const unlockPage = () => {
@@ -358,5 +356,5 @@ document.querySelectorAll(".magnetic").forEach((element) => {
 
 window.addEventListener("pagehide", () => {
   lenis?.destroy();
-  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  if (rafId) cancelAnimationFrame(rafId);
 }, { once: true });

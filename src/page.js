@@ -1,4 +1,4 @@
-import fallbackServiceImage from "../Images/sections/after-finished.png";
+import fallbackServiceImage from "../Images/sections/after-finished.jpg";
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const siteBase = import.meta.env.BASE_URL || "/";
