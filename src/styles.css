@@ -2677,6 +2677,11 @@ body.ready .hero__footer {
     pointer-events: none !important;
   }
 
+  .hero__dock,
+  .room-status {
+    display: none !important;
+  }
+
   .hero__wash {
     background:
       linear-gradient(90deg, rgba(16, 14, 13, 0.86), rgba(16, 14, 13, 0.28)),
